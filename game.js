@@ -8,8 +8,8 @@ let y = 0;
 let direction = 0;
 let mouseDown = false;
 let gloop;
-let shots = new Array();
-let balls = new Array();
+let shots = [];
+let balls = [];
 
 let BackGround = function () {
     this.drawGun = function () {
@@ -162,8 +162,8 @@ function loop() {
     gloop = setTimeout(loop, 25);
 }
 
-function getMousePos(canvas, e) {
-    var rect = canvas.getBoundingClientRect();
+let getMousePos = function (canvas, e) {
+    let rect = canvas.getBoundingClientRect();
     return {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
@@ -173,14 +173,14 @@ canvas.addEventListener('mousemove', function (e) {
     let mousePos = getMousePos(canvas, e);
     x = mousePos.x;
     y = mousePos.y;
-}, false);
+} );
 canvas.addEventListener('mousedown', function (e) {
     let mousePos = getMousePos(canvas, e);
     let shotX = mousePos.x;
     let shotY = mousePos.y;
     shots.push(new Shots(shotX, shotY));
     mouseDown = true;
-}, false);
+});
 canvas.addEventListener('mouseup', function (e) {
     mouseDown = false;
 });
