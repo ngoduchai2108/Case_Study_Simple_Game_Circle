@@ -1,6 +1,10 @@
 const VERY_RIGHT = 800;
 const VERY_BUTTON = 600;
 
+document.getElementById('title').innerHTML = '<h3>GAME MOVE BALLS SIMPLE</h3>';
+document.getElementById('hp').innerHTML = 'HP : 20';
+document.getElementById('point').innerHTML = 'Point : 0';
+
 let canvas = document.getElementById('canvas');
 let pen = canvas.getContext('2d');
 let x = 400;
@@ -10,6 +14,10 @@ let mouseDown = false;
 let gloop;
 let shots = [];
 let balls = [];
+let count = 0;
+let hp = 20;
+let point = 100;
+let stop = false;
 
 let BackGround = function () {
     this.drawGun = function () {
@@ -40,7 +48,7 @@ let Ball = function () {
     this.y = 0;
     this.radius = 20;
     this.speed = 1/2;
-    this.color = "#aacc44";
+    this.color = getRandomColor();
     this.drawCircle = function () {
         pen.beginPath();
         pen.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
@@ -51,12 +59,8 @@ let Ball = function () {
         this.y += this.speed;
         if (this.y > VERY_BUTTON - 20) {
             balls.splice(balls.indexOf(this), 1);
+            hp--;
         }
-        // for (let i=0;i<shots.length;i++){
-        //     if (Math.sqrt(Math.pow((shots[i].x - this.x),2)+Math.pow((shots[i].y - this.y),2)) === this.radius + shots[i].radius){
-        //         balls.splice(balls.indexOf(this),1);
-        //     }
-        // }
     };
 };
 
@@ -83,16 +87,18 @@ let Shots = function (shotX, shotY) {
         if (this.y < 0){
             shots.splice(shots.indexOf(this),1);
         }
-        // for (let i=0;i<balls.length;i++){
-        //     if (Math.sqrt(Math.pow((balls[i].x - this.x),2)+Math.pow((balls[i].y - this.y),2)) === this.radius + balls[i].radius){
-        //         shots.splice(shots.indexOf(this),1);
-        //     }
-        // }
+
         this.x += this.speedX * this.angle[0];
         this.y -= this.speedY * this.angle[1];
     }
 
 };
+
+function getRandomColor() {
+    let color = ["AABBCC",  "11CCFF", "22DDCC", "AAFF22"]
+    return "#"+color[Math.floor(Math.random()*4)];
+
+}
 
 function getAngle(coordx, coordy) {
     let angleX, angleY, neg = false;
@@ -142,20 +148,31 @@ function draw() {
         balls[i].drawCircle();
     }
 }
-let count = 0;
+
 function loop() {
-    if (count%15 === 0){
+    if (count%15 === 0 && stop === false){
         balls.push(new Ball());
     }
     count++;
     process();
     draw();
+    document.getElementById('hp').innerHTML = 'HP : '+hp;
+    document.getElementById('point').innerHTML = 'Point : '+point;
+    if (hp <= 0 ){
+        stop = true;
+        for (let i= 0;i<balls.length;i++){
+            balls.splice(balls.indexOf(balls[i]), 1);
+        }
+        document.getElementById('result').innerHTML = '<h1>GAME OVER !!!</h1>'
+    }
     for (let i=0;i<balls.length;i++) {
         for (let j = 0; j < shots.length; j++) {
             if (Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)) < shots[j].radius + balls[i].radius) {
                 shots.splice(shots.indexOf(shots[j]), 1);
                 balls.splice(balls.indexOf(balls[i]), 1);
+                point++;
             }
+
             // console.log(Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)))
         }
     }
