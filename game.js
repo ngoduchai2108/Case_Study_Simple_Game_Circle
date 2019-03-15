@@ -14,39 +14,11 @@ let gun = new Gun();
 let balls = [];
 let rects = [];
 let count = 0;
-let hp = 20;
+let _hp = 20;
 let point = 100;
 let stop = false;
 
-let Shots = function (shotX, shotY) {
-    this.x = (VERY_RIGHT / 2) ;
-    this.y = VERY_BUTTON - 60;
-    this.radius = 5;
-    this.speedX = 8;
-    this.speedY = 8;
-    this.angle = getAngle(shotX, shotY);
-    this.drawShots = function () {
-        pen.fillStyle = "#aacc44";
-        pen.beginPath();
-        pen.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        pen.fill();
-    };
-    this.move = function () {
-        if (this.x < this.radius || this.x > VERY_RIGHT - this.radius) {
-            this.speedX = -this.speedX;
-        }
-        if (this.y > VERY_BUTTON - this.radius) {
-            this.speedY = -this.speedY;
-        }
-        if (this.y < 0){
-            shots.splice(shots.indexOf(this),1);
-        }
 
-        this.x += this.speedX * this.angle[0];
-        this.y -= this.speedY * this.angle[1];
-    }
-
-};
 
 function getRandomColor() {
     let color = ["AABBCC",  "11CCFF", "22DDCC", "AAFF22"]
@@ -81,15 +53,33 @@ function degToRad(angle) {
     return angle * Math.PI / 180;
 };
 
-function process() {
+function moveAll() {
     for (let i = 0; i < shots.length; i++) {
-        shots[i].move();
+        if (shots[i].x < shots[i].radius || shots[i].x > VERY_RIGHT - shots[i].radius) {
+            shots[i].speedX = -shots[i].speedX;
+        }
+        if (shots[i].y > VERY_BUTTON - shots[i].radius) {
+            shots[i].speedY = -shots[i].speedY;
+        }
+        if (shots[i].y < 0){
+            shots.splice(shots.indexOf(shots[i]),1);
+        }
+        shots[i].x += shots[i].speedX * shots[i].angle[0];
+        shots[i].y -= shots[i].speedY * shots[i].angle[1];
     };
     for (let i = 0; i < balls.length; i++) {
-        balls[i].move();
+        balls[i].y += balls[i].speed;
+        if (balls[i].y > VERY_BUTTON - 20) {
+            balls.splice(balls.indexOf(balls[i]), 1);
+            _hp--;
+        }
     };
     for (let i = 0; i < rects.length; i++) {
-        rects[i].move();
+        rects[i].y += rects[i].speed;
+        if (rects[i].y >VERY_BUTTON -20){
+            rects.splice(rects.indexOf(rects[i]),1);
+            _hp--;
+        }
     };
 }
 function draw() {
@@ -98,16 +88,45 @@ function draw() {
     pen.fillRect(0, 0, canvas.width, canvas.height);
     // let imgs = document.getElementById('anh');
     // pen.drawImage(imgs,10,10)
-    gun.drawGun();
-    for (let i = 0; i < shots.length; i++) {
-        shots[i].drawShots();
-    }
-    for (let i = 0; i < balls.length; i++) {
-        balls[i].drawCircle();
-    }
+    //drawGun
+    pen.fillStyle = "#aacc44";
+    pen.strokeStyle = "#aacc44";
+    pen.rect((VERY_RIGHT / 2)-20, VERY_BUTTON - 60, 40, 60);
+    pen.fill();
 
+    pen.beginPath();
+    pen.arc((VERY_RIGHT / 2), VERY_BUTTON - 60, 20, Math.PI, 2 * Math.PI);
+    pen.fill();
+
+    pen.beginPath();
+    pen.lineWidth = "10";
+    pen.moveTo((VERY_RIGHT / 2), VERY_BUTTON - 60);
+    let valueX, valueY, angle;
+    angle = getAngle(gun.x, gun.y);
+    valueX = 50 * angle[0];
+    valueY = 50 * angle[1];
+    pen.lineTo(valueX + (VERY_RIGHT / 2) , VERY_BUTTON - 60 - valueY);
+    pen.stroke();
+    //drawShots
+    for (let i = 0; i < shots.length; i++) {
+        pen.fillStyle = "#aacc44";
+        pen.beginPath();
+        pen.arc(shots[i].x, shots[i].y, shots[i].radius, 0, 2 * Math.PI);
+        pen.fill();
+    }
+    //drawBalls
+    for (let i = 0; i < balls.length; i++) {
+        pen.beginPath();
+        pen.arc(balls[i].x, balls[i].y, balls[i].radius, 0, 2 * Math.PI);
+        pen.fillStyle = balls[i].color;
+        pen.fill();
+    }
+    //drawRect
     for (let i = 0; i < rects.length; i++) {
-        rects[i].drawRect();
+        pen.beginPath();
+        pen.rect(rects[i].x, rects[i].y, rects[i].length, rects[i].width);
+        pen.fillStyle = rects[i].color;
+        pen.fill();
     }
 }
 
@@ -120,10 +139,10 @@ function loop() {
     };
 
     count++;
-    process();
-    document.getElementById('hp').innerHTML = 'HP : '+hp;
+    moveAll();
+    document.getElementById('hp').innerHTML = 'HP : '+_hp;
     document.getElementById('point').innerHTML = 'Point : '+point;
-    if (hp <= 0 ){
+    if (_hp <= 0 ){
         stop = true;
         for (let i= 0;i<balls.length;i++){
             balls.splice(balls.indexOf(balls[i]), 1);
