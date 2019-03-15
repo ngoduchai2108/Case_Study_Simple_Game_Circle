@@ -14,6 +14,7 @@ let mouseDown = false;
 let gloop;
 let shots = [];
 let balls = [];
+let rects = [];
 let count = 0;
 let hp = 20;
 let point = 100;
@@ -62,6 +63,28 @@ let Ball = function () {
             hp--;
         }
     };
+};
+
+let Rect = function(){
+  this.x = Math.floor(Math.random() * (VERY_RIGHT -60))+30;
+  this.y = 0;
+  this.length = 20;
+  this.width = 20;
+  this.speed = 1/2;
+  this.color = getRandomColor();
+  this.drawRect = function () {
+      pen.beginPath();
+      pen.rect(this.x, this.y, this.length, this.width);
+      pen.fillStyle = this.color;
+      pen.fill();
+  };
+  this.move = function () {
+      this.y += this.speed;
+      if (this.y >VERY_BUTTON -20){
+          rects.splice(rects.indexOf(this),1);
+          hp--;
+      }
+  };
 };
 
 let Shots = function (shotX, shotY) {
@@ -130,16 +153,20 @@ function degToRad(angle) {
 function process() {
     for (let i = 0; i < shots.length; i++) {
         shots[i].move();
-    }
+    };
     for (let i = 0; i < balls.length; i++) {
         balls[i].move();
-    }
+    };
+    for (let i = 0; i < rects.length; i++) {
+        rects[i].move();
+    };
 }
 function draw() {
-    // let rect = canvas.getBoundingClientRect();
     pen.clearRect(0, 0, canvas.width, canvas.height);
     pen.fillStyle = "#dddddd";
     pen.fillRect(0, 0, canvas.width, canvas.height);
+    // let imgs = document.getElementById('anh');
+    // pen.drawImage(imgs,10,10)
     background.drawGun();
     for (let i = 0; i < shots.length; i++) {
         shots[i].drawShots();
@@ -147,12 +174,20 @@ function draw() {
     for (let i = 0; i < balls.length; i++) {
         balls[i].drawCircle();
     }
+
+    for (let i = 0; i < rects.length; i++) {
+        rects[i].drawRect();
+    }
 }
 
 function loop() {
-    if (count%15 === 0 && stop === false){
+    if (count%25 === 0 && stop === false){
         balls.push(new Ball());
-    }
+    };
+    if (count%40 === 0 && stop === false){
+        rects.push(new Rect());
+    };
+
     count++;
     process();
     draw();
@@ -163,8 +198,12 @@ function loop() {
         for (let i= 0;i<balls.length;i++){
             balls.splice(balls.indexOf(balls[i]), 1);
         }
+        for (let i= 0;i<rects.length;i++){
+            balls.splice(rects.indexOf(rects[i]), 1);
+        }
         document.getElementById('result').innerHTML = '<h1>GAME OVER !!!</h1>'
     }
+    //shot cham vao hinh tron
     for (let i=0;i<balls.length;i++) {
         for (let j = 0; j < shots.length; j++) {
             if (Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)) < shots[j].radius + balls[i].radius) {
@@ -172,10 +211,48 @@ function loop() {
                 balls.splice(balls.indexOf(balls[i]), 1);
                 point++;
             }
-
-            // console.log(Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)))
         }
     }
+    //shot cham vao hinh vuong
+    for (let i=0;i<rects.length;i++) {
+        for (let j = 0; j < shots.length; j++) {
+            if (shots[j].x >= rects[i].x && shots[j].x <= (rects[i].x + rects.length && shots[j].y - rects[i].y <=  rects[i].width)) {
+                shots.splice(shots.indexOf(shots[j]), 1);
+                rects.splice(rects.indexOf(rects[i]), 1);
+                point++;
+            }
+        }
+    }
+    // 2 hinh tron trung nhau
+    for (let i=0;i<balls.length;i++) {
+        for (let j = i+1; j < balls.length; j++) {
+            if (Math.sqrt(Math.pow((balls[i].x - balls[j].x), 2) + Math.pow((balls[i].y - balls[j].y), 2)) < balls[j].radius + balls[i].radius) {
+                balls.splice(balls.indexOf(balls[j]), 1);
+                balls.splice(balls.indexOf(balls[i]), 1);
+                point++;
+            }
+        }
+    }
+    // 2 hinh vuong trung nhau
+    for (let i =0;i<rects.length;i++){
+        for (let j= 0;j<rects.length;j++){
+            if (Math.abs(rects[i].x - rects[j].x) <= rects[i].length && Math.abs(rects[i].y - rects[j].y) <= rects[i].length  ) {
+                rects.splice(rects.indexOf(rects[j]), 1);
+                rects.splice(rects.indexOf(rects[i]), 1);
+            }
+        }
+    }
+    //hinh vuong ,hinh tron trung nhau
+    for (let i =0;i<rects.length;i++){
+        for (let j= 0;j<balls.length;j++){
+            if (balls[j].x >= rects[i].x && balls[j].x <= (rects[i].x + rects[i].length) && (balls[j].y - rects[i].y)<rects[i].width) {
+                balls.splice(balls.indexOf(balls[j]), 1);
+                rects.splice(rects.indexOf(rects[i]), 1);
+
+            }
+        }
+    }
+
     gloop = setTimeout(loop, 25);
 }
 
