@@ -20,7 +20,7 @@ let hp = 20;
 let point = 100;
 let stop = false;
 
-let BackGround = function () {
+let Gun = function () {
     this.drawGun = function () {
         pen.fillStyle = "#aacc44";
         pen.strokeStyle = "#aacc44";
@@ -42,7 +42,7 @@ let BackGround = function () {
         pen.stroke();
     }
 };
-let background = new BackGround();
+let background = new Gun();
 
 let Ball = function () {
     this.x = Math.floor(Math.random() * (VERY_RIGHT - 60)) + 30;
