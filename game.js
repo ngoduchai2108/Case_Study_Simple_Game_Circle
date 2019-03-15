@@ -7,8 +7,6 @@ document.getElementById('point').innerHTML = 'Point : 0';
 
 let canvas = document.getElementById('canvas');
 let pen = canvas.getContext('2d');
-let x = 400;
-let y = 0;
 let direction = 0;
 let mouseDown = false;
 let gloop;
@@ -21,6 +19,8 @@ let point = 100;
 let stop = false;
 
 let Gun = function () {
+    this.x = 400;
+    this.y = 0;
     this.drawGun = function () {
         pen.fillStyle = "#aacc44";
         pen.strokeStyle = "#aacc44";
@@ -35,14 +35,14 @@ let Gun = function () {
         pen.lineWidth = "10";
         pen.moveTo((VERY_RIGHT / 2), VERY_BUTTON - 60);
         let valueX, valueY, angle;
-        angle = getAngle(x, y);
+        angle = getAngle(this.x, this.y);
         valueX = 50 * angle[0];
         valueY = 50 * angle[1];
         pen.lineTo(valueX + (VERY_RIGHT / 2) , VERY_BUTTON - 60 - valueY);
         pen.stroke();
     }
 };
-let background = new Gun();
+let gun = new Gun();
 
 let Ball = function () {
     this.x = Math.floor(Math.random() * (VERY_RIGHT - 60)) + 30;
@@ -167,7 +167,7 @@ function draw() {
     pen.fillRect(0, 0, canvas.width, canvas.height);
     // let imgs = document.getElementById('anh');
     // pen.drawImage(imgs,10,10)
-    background.drawGun();
+    gun.drawGun();
     for (let i = 0; i < shots.length; i++) {
         shots[i].drawShots();
     }
@@ -265,8 +265,8 @@ let getMousePos = function (canvas, e) {
 };
 canvas.addEventListener('mousemove', function (e) {
     let mousePos = getMousePos(canvas, e);
-    x = mousePos.x;
-    y = mousePos.y;
+    gun.x = mousePos.x;
+    gun.y = mousePos.y;
 } );
 canvas.addEventListener('mousedown', function (e) {
     let mousePos = getMousePos(canvas, e);
