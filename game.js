@@ -7,7 +7,6 @@ document.getElementById('point').innerHTML = 'Point : 0';
 
 let canvas = document.getElementById('canvas');
 let pen = canvas.getContext('2d');
-let direction = 0;
 let mouseDown = false;
 let gloop;
 let shots = [];
@@ -21,6 +20,7 @@ let stop = false;
 let Gun = function () {
     this.x = 400;
     this.y = 0;
+    this.direction = 0;
     this.drawGun = function () {
         pen.fillStyle = "#aacc44";
         pen.strokeStyle = "#aacc44";
@@ -127,18 +127,18 @@ function getAngle(coordx, coordy) {
     let angleX, angleY, neg = false;
     if (coordx === ((VERY_RIGHT / 2))) {
         if (coordy <= (VERY_BUTTON - 60)) {
-            direction = degToRad(90);
+            gun.direction = degToRad(90);
         } else {
-            direction = degToRad(270);
+            gun.direction = degToRad(270);
         }
     } else{
-        direction = Math.atan((VERY_BUTTON - 60 - coordy) / (coordx - (VERY_RIGHT / 2)));
+        gun.direction = Math.atan((VERY_BUTTON - 60 - coordy) / (coordx - (VERY_RIGHT / 2)));
         if (coordx < (VERY_RIGHT / 2)) {
             neg = true;
         }
     }
-    angleX = Math.cos(direction);
-    angleY = Math.sin(direction);
+    angleX = Math.cos(gun.direction);
+    angleY = Math.sin(gun.direction);
     if (neg){
         angleX = -angleX;
         angleY = -angleY;
