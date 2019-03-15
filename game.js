@@ -130,12 +130,47 @@ function draw() {
     }
 }
 
+
+
 function loop() {
-    if (count%20 === 0 && stop === false){
-        balls.push(new Ball());
+    if (count%23 === 0 && stop === false){
+        // balls.push(new Ball());
+        let ball = new Ball();
+        let check_ball = true;
+            for (let i = 0; i < balls.length; i++) {
+                if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
+                    check_ball = false;
+                    break;
+                }
+            }
+        for (let i = 0; i < rects.length; i++) {
+            if ((ball.x >= rects[i].x && ball.y >=rects[i].width && (ball.x - rects[i].x) < (ball.radius + rects[i].length))||(ball.x <= rects[i].x && rects[i].width <= ball.y && (rects[i].x - ball.x) < rects[i].length) ) {
+                check_ball = false;
+                break;
+            }
+        }
+        if (check_ball === true){
+            balls.push(ball);
+        }
     };
-    if (count%15 === 0 && stop === false){
-        rects.push(new Rect());
+    if (count%17 === 0 && stop === false){
+        let rect = new Rect();
+        let check_rect = true;
+        for (let i =0;i<rects.length;i++){
+                if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width  ) {
+                    check_rect = false;
+                    break;
+                }
+            }
+        for (let i = 0; i < balls.length; i++) {
+            if ((rect.x >= balls[i].x && rect.width >=balls[i].y && (rect.x - balls[i].x) <  balls[i].radius)||(rect.x <= balls[i].x && balls[i].y < rect.width && (balls[i].x - rect.x) < (balls[i].radius + rect.length)) ) {
+                check_rect= false;
+                break;
+            }
+        }
+        if (check_rect === true){
+            rects.push(rect);
+        }
     };
 
     count++;
@@ -173,35 +208,19 @@ function loop() {
         }
     }
     // 2 hinh tron trung nhau
-    for (let i=0;i<balls.length;i++) {
-        for (let j = i+1; j < balls.length; j++) {
-            if (Math.sqrt(Math.pow((balls[i].x - balls[j].x), 2) + Math.pow((balls[i].y - balls[j].y), 2)) < balls[j].radius + balls[i].radius) {
-                balls.splice(balls.indexOf(balls[j]), 1);
-                balls.splice(balls.indexOf(balls[i]), 1);
 
-            }
-        }
-    }
    // 2 hinh vuong trung nhau
-    for (let i =0;i<rects.length;i++){
-        for (let j= i+1;j<rects.length;j++){
-            if (Math.abs(rects[i].x - rects[j].x) <= rects[i].length && Math.abs(rects[i].y - rects[j].y) <= rects[i].width  ) {
-                console.log(Math.abs(rects[i].x - rects[j].x));
-                rects.splice(rects.indexOf(rects[j]), 1);
-                rects.splice(rects.indexOf(rects[i]), 1);
-            }
-        }
-    }
-    //hinh vuong ,hinh tron trung nhau
-    for (let i =0;i<rects.length;i++){
-        for (let j= 0;j<balls.length;j++){
-            if (balls[j].x >= (rects[i].x - balls[j].radius) && balls[j].x <= (rects[i].x + rects[i].length + balls[j].radius) && Math.abs(balls[j].y - rects[i].y)<= (rects[i].width +balls[j].radius)) {
-                balls.splice(balls.indexOf(balls[j]), 1);
-                rects.splice(rects.indexOf(rects[i]), 1);
 
-            }
-        }
-    }
+    //hinh vuong ,hinh tron trung nhau
+    // for (let i =0;i<rects.length;i++){
+    //     for (let j= 0;j<balls.length;j++){
+    //         if (balls[j].x >= (rects[i].x - balls[j].radius) && balls[j].x <= (rects[i].x + rects[i].length + balls[j].radius) && Math.abs(balls[j].y - rects[i].y)<= (rects[i].width +balls[j].radius)) {
+    //             balls.splice(balls.indexOf(balls[j]), 1);
+    //             rects.splice(rects.indexOf(rects[i]), 1);
+    //
+    //         }
+    //     }
+    // }
     draw();
     gloop = setTimeout(loop, 25);
 }
