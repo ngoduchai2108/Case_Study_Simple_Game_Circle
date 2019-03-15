@@ -15,7 +15,7 @@ let balls = [];
 let rects = [];
 let count = 0;
 let hp = 20;
-let point = 100;
+let point = 101;
 let stop = false;
 
 //Cach 1:Lay mau random
@@ -240,12 +240,21 @@ function loop() {
         document.getElementById('result').innerHTML = '<h1>GAME OVER !!!</h1>'
     }
     //Dieu kien chien thang
-    if (point === 250){
+    if (point === 350){
         stop = true;
         balls = [];
         rects = [];
         shots = [];
         document.getElementById('result').innerHTML = '<h1>YOU WIN !!!</h1>'
+    }
+    //Sau point = 250 thi speed tang len
+    if (point%50 === 0 ){
+        for (let i=0; i<balls.length;i++){
+            balls[i].speed = balls[i].speed*21/20;
+        }
+        for (let i=0; i<rects.length;i++){
+            rects[i].speed = rects[i].speed*21/20;
+        }
     }
     //shot cham vao hinh tron
     for (let i = 0; i < balls.length; i++) {
@@ -258,6 +267,9 @@ function loop() {
                     point++;
                 }
                 else {
+                    // shots[j].speedY = -shots[j].speedY;
+                    // shots[i].x += shots[i].speedX * shots[i].angle[0];
+                    // shots[i].y -= shots[i].speedY * shots[i].angle[1];
                     shots.splice(shots.indexOf(shots[j]), 1);
                     point++;
                 }
@@ -275,6 +287,9 @@ function loop() {
                     point++;
                 }
                 else {
+                    // shots[j].speedY = -shots[j].speedY;
+                    // shots[i].x += shots[i].speedX * shots[i].angle[0];
+                    // shots[i].y -= shots[i].speedY * shots[i].angle[1];
                     shots.splice(shots.indexOf(shots[j]), 1);
                     point++;
                 }
