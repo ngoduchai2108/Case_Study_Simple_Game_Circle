@@ -2,7 +2,6 @@ const Gun = function () {
     this.x = 400;
     this.y = 0;
     this.direction = 0;
-
 };
 
 const Shots = function (shotX, shotY) {
@@ -12,6 +11,4 @@ const Shots = function (shotX, shotY) {
     this.speedX = 8;
     this.speedY = 8;
     this.angle = getAngle(shotX, shotY);
-
-
 };

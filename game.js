@@ -14,18 +14,27 @@ let gun = new Gun();
 let balls = [];
 let rects = [];
 let count = 0;
-let _hp = 20;
+let hp = 20;
 let point = 100;
 let stop = false;
 
-
-
-function getRandomColor() {
-    let color = ["AABBCC",  "11CCFF", "22DDCC", "AAFF22"]
-    return "#"+color[Math.floor(Math.random()*4)];
-
+//Cach 1:Lay mau random
+// function getRandomColor() {
+//     let color = ["AABBCC", "11CCFF", "22DDCC", "AAFF22"];
+//     return "#" + color[Math.floor(Math.random() * 4)];
+//
+// }
+//Cach 2: Lay mau random
+function getRandomHex() {
+    return Math.floor(Math.random() * 255)
 }
 
+function getRandomColor() {
+    let red = getRandomHex();
+    let green = getRandomHex();
+    let blue = getRandomHex();
+    return "rgb(" + red + ',' + green + ',' + blue + ')';
+}
 function getAngle(coordx, coordy) {
     let angleX, angleY, neg = false;
     if (coordx === ((VERY_RIGHT / 2))) {
@@ -34,7 +43,7 @@ function getAngle(coordx, coordy) {
         } else {
             gun.direction = degToRad(270);
         }
-    } else{
+    } else {
         gun.direction = Math.atan((VERY_BUTTON - 60 - coordy) / (coordx - (VERY_RIGHT / 2)));
         if (coordx < (VERY_RIGHT / 2)) {
             neg = true;
@@ -42,16 +51,17 @@ function getAngle(coordx, coordy) {
     }
     angleX = Math.cos(gun.direction);
     angleY = Math.sin(gun.direction);
-    if (neg){
+    if (neg) {
         angleX = -angleX;
         angleY = -angleY;
-        neg =false;
+        neg = false;
     }
     return [angleX, angleY];
 }
+
 function degToRad(angle) {
     return angle * Math.PI / 180;
-};
+}
 
 function moveAll() {
     for (let i = 0; i < shots.length; i++) {
@@ -61,37 +71,36 @@ function moveAll() {
         if (shots[i].y > VERY_BUTTON - shots[i].radius) {
             shots[i].speedY = -shots[i].speedY;
         }
-        if (shots[i].y < 0){
-            shots.splice(shots.indexOf(shots[i]),1);
+        if (shots[i].y < 0) {
+            shots.splice(shots.indexOf(shots[i]), 1);
         }
         shots[i].x += shots[i].speedX * shots[i].angle[0];
         shots[i].y -= shots[i].speedY * shots[i].angle[1];
-    };
+    }
     for (let i = 0; i < balls.length; i++) {
         balls[i].y += balls[i].speed;
         if (balls[i].y > VERY_BUTTON - 20) {
             balls.splice(balls.indexOf(balls[i]), 1);
-            _hp--;
+            hp--;
         }
-    };
+    }
     for (let i = 0; i < rects.length; i++) {
         rects[i].y += rects[i].speed;
-        if (rects[i].y >VERY_BUTTON -20){
-            rects.splice(rects.indexOf(rects[i]),1);
-            _hp--;
+        if (rects[i].y > VERY_BUTTON - 20) {
+            rects.splice(rects.indexOf(rects[i]), 1);
+            hp--;
         }
-    };
+    }
 }
+
 function draw() {
     pen.clearRect(0, 0, canvas.width, canvas.height);
     pen.fillStyle = "#dddddd";
     pen.fillRect(0, 0, canvas.width, canvas.height);
-    // let imgs = document.getElementById('anh');
-    // pen.drawImage(imgs,10,10)
     //drawGun
     pen.fillStyle = "#aacc44";
     pen.strokeStyle = "#aacc44";
-    pen.rect((VERY_RIGHT / 2)-20, VERY_BUTTON - 60, 40, 60);
+    pen.rect((VERY_RIGHT / 2) - 20, VERY_BUTTON - 60, 40, 60);
     pen.fill();
 
     pen.beginPath();
@@ -105,7 +114,7 @@ function draw() {
     angle = getAngle(gun.x, gun.y);
     valueX = 50 * angle[0];
     valueY = 50 * angle[1];
-    pen.lineTo(valueX + (VERY_RIGHT / 2) , VERY_BUTTON - 60 - valueY);
+    pen.lineTo(valueX + (VERY_RIGHT / 2), VERY_BUTTON - 60 - valueY);
     pen.stroke();
     //drawShots
     for (let i = 0; i < shots.length; i++) {
@@ -130,98 +139,148 @@ function draw() {
     }
 }
 
-
-
 function loop() {
-    if (count%23 === 0 && stop === false){
-        // balls.push(new Ball());
+    //binh 1oai 1
+    if (count % 23 === 0 && stop === false && count % 17 !== 0) {
         let ball = new Ball();
         let check_ball = true;
-            for (let i = 0; i < balls.length; i++) {
-                if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
-                    check_ball = false;
-                    break;
-                }
-            }
-        for (let i = 0; i < rects.length; i++) {
-            if ((ball.x >= rects[i].x && ball.y >=rects[i].width && (ball.x - rects[i].x) < (ball.radius + rects[i].length))||(ball.x <= rects[i].x && rects[i].width <= ball.y && (rects[i].x - ball.x) < rects[i].length) ) {
+        for (let i = 0; i < balls.length; i++) {
+            if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
                 check_ball = false;
                 break;
             }
         }
-        if (check_ball === true){
-            balls.push(ball);
-        }
-    };
-    if (count%17 === 0 && stop === false){
-        let rect = new Rect();
-        let check_rect = true;
-        for (let i =0;i<rects.length;i++){
-                if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width  ) {
-                    check_rect = false;
-                    break;
-                }
-            }
-        for (let i = 0; i < balls.length; i++) {
-            if ((rect.x >= balls[i].x && rect.width >=balls[i].y && (rect.x - balls[i].x) <  balls[i].radius)||(rect.x <= balls[i].x && balls[i].y < rect.width && (balls[i].x - rect.x) < (balls[i].radius + rect.length)) ) {
-                check_rect= false;
+        for (let i = 0; i < rects.length; i++) {
+            if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
+                check_ball = false;
                 break;
             }
         }
-        if (check_rect === true){
+        if (check_ball === true) {
+            balls.push(ball);
+        }
+    }
+    // tuong loai 1
+    if (count % 133 === 0 && stop === false && count % 17 !== 0) {
+        let ball = new Ball();
+        ball.radius = 20;
+        ball.hp_ball = 3;
+        let check_ball = true;
+        for (let i = 0; i < balls.length; i++) {
+            if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
+                check_ball = false;
+                break;
+            }
+        }
+        for (let i = 0; i < rects.length; i++) {
+            if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
+                check_ball = false;
+                break;
+            }
+        }
+        if (check_ball === true) {
+            balls.push(ball);
+        }
+    }
+    //binh loai 2
+    if (count % 17 === 0 && stop === false && count % 23 !== 0) {
+        let rect = new Rect();
+        let check_rect = true;
+        for (let i = 0; i < rects.length; i++) {
+            if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
+                check_rect = false;
+                break;
+            }
+        }
+        for (let i = 0; i < balls.length; i++) {
+            if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
+                check_rect = false;
+                break;
+            }
+        }
+        if (check_rect === true) {
             rects.push(rect);
         }
-    };
+    }
+    //tuong loai 2
+    if (count % 177 === 0 && stop === false && count % 23 !== 0) {
+        let rect = new Rect();
+        rect.length = 30;
+        rect.width = 30;
+        rect.hp_rect = 3;
+        let check_rect = true;
+        for (let i = 0; i < rects.length; i++) {
+            if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
+                check_rect = false;
+                break;
+            }
+        }
+        for (let i = 0; i < balls.length; i++) {
+            if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
+                check_rect = false;
+                break;
+            }
+        }
+        if (check_rect === true) {
+            rects.push(rect);
+        }
+    }
 
     count++;
     moveAll();
-    document.getElementById('hp').innerHTML = 'HP : '+_hp;
-    document.getElementById('point').innerHTML = 'Point : '+point;
-    if (_hp <= 0 ){
+    draw();
+    document.getElementById('hp').innerHTML = 'HP : ' + hp;
+    document.getElementById('point').innerHTML = 'Point : ' + point;
+    //Dieu kien Game Over
+    if (hp <= 0) {
         stop = true;
-        for (let i= 0;i<balls.length;i++){
-            balls.splice(balls.indexOf(balls[i]), 1);
-        }
-        for (let i= 0;i<rects.length;i++){
-            balls.splice(rects.indexOf(rects[i]), 1);
-        }
+        balls = [];
+        rects = [];
+        shots = [];
         document.getElementById('result').innerHTML = '<h1>GAME OVER !!!</h1>'
     }
+    //Dieu kien chien thang
+    if (point === 250){
+        stop = true;
+        balls = [];
+        rects = [];
+        shots = [];
+        document.getElementById('result').innerHTML = '<h1>YOU WIN !!!</h1>'
+    }
     //shot cham vao hinh tron
-    for (let i=0;i<balls.length;i++) {
+    for (let i = 0; i < balls.length; i++) {
         for (let j = 0; j < shots.length; j++) {
             if (Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)) < shots[j].radius + balls[i].radius) {
-                shots.splice(shots.indexOf(shots[j]), 1);
-                balls.splice(balls.indexOf(balls[i]), 1);
-                point++;
+                balls[i].hp_ball--;
+                if (balls[i].hp_ball === 0){
+                    shots.splice(shots.indexOf(shots[j]), 1);
+                    balls.splice(balls.indexOf(balls[i]), 1);
+                    point++;
+                }
+                else {
+                    shots.splice(shots.indexOf(shots[j]), 1);
+                    point++;
+                }
             }
         }
     }
     //shot cham vao hinh vuong
-    for (let i=0;i<rects.length;i++) {
+    for (let i = 0; i < rects.length; i++) {
         for (let j = 0; j < shots.length; j++) {
-            if (shots[j].x >= rects[i].x && shots[j].x <= (rects[i].x + rects[i].length) && (shots[j].y - rects[i].y) <=  rects[i].width) {
-                shots.splice(shots.indexOf(shots[j]), 1);
-                rects.splice(rects.indexOf(rects[i]), 1);
-                point++;
+            if (shots[j].x >= rects[i].x && shots[j].x <= (rects[i].x + rects[i].length) && (shots[j].y - rects[i].y) <= rects[i].width) {
+                rects[i].hp_rect--;
+                if (rects[i].hp_rect === 0){
+                    shots.splice(shots.indexOf(shots[j]), 1);
+                    rects.splice(rects.indexOf(rects[i]), 1);
+                    point++;
+                }
+                else {
+                    shots.splice(shots.indexOf(shots[j]), 1);
+                    point++;
+                }
             }
         }
     }
-    // 2 hinh tron trung nhau
-
-   // 2 hinh vuong trung nhau
-
-    //hinh vuong ,hinh tron trung nhau
-    // for (let i =0;i<rects.length;i++){
-    //     for (let j= 0;j<balls.length;j++){
-    //         if (balls[j].x >= (rects[i].x - balls[j].radius) && balls[j].x <= (rects[i].x + rects[i].length + balls[j].radius) && Math.abs(balls[j].y - rects[i].y)<= (rects[i].width +balls[j].radius)) {
-    //             balls.splice(balls.indexOf(balls[j]), 1);
-    //             rects.splice(rects.indexOf(rects[i]), 1);
-    //
-    //         }
-    //     }
-    // }
-    draw();
     gloop = setTimeout(loop, 25);
 }
 
@@ -236,7 +295,7 @@ canvas.addEventListener('mousemove', function (e) {
     let mousePos = getMousePos(canvas, e);
     gun.x = mousePos.x;
     gun.y = mousePos.y;
-} );
+});
 canvas.addEventListener('mousedown', function (e) {
     let mousePos = getMousePos(canvas, e);
     let shotX = mousePos.x;

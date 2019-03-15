@@ -5,8 +5,7 @@ const Rect = function(){
     this.width = 20;
     this.speed = 1/2;
     this.color = getRandomColor();
-
-
+    this.hp_rect = 1;
 };
 
 const Ball = function () {
@@ -15,6 +14,5 @@ const Ball = function () {
     this.radius = 10;
     this.speed = 1/2;
     this.color = getRandomColor();
-
-
+    this.hp_ball = 1;
 };
