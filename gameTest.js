@@ -153,83 +153,83 @@ function drawAll() {
     drawShots();
 }
 
-function checkTypeBall(ball) {
-    let check_ball = true;
+function checkTypeBall(ball,check) {
+    check = true;
     for (let i = 0; i < balls.length; i++) {
         if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
-            check_ball = false;
+            check = false;
             break;
         }
     }
     for (let i = 0; i < rects.length; i++) {
         if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
-            check_ball = false;
+            check = false;
             break;
         }
     }
-    if (check_ball === true) {
-        balls.push(ball);
-    }
+    return check;
 }
 
-function loop() {
+function checkTypeRect(rect,check) {
+    check = true;
+    for (let i = 0; i < rects.length; i++) {
+        if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
+            check = false;
+            break;
+        }
+    }
+    for (let i = 0; i < balls.length; i++) {
+        if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
+            check = false;
+            break;
+        }
+    }
+    return check;
+}
+
+function selectEnemy() {
     //binh 1oai 1
     if (count % 23 === 0 && stop === false && count % 17 !== 0) {
         let ball = new Ball();
-        checkTypeBall(ball);
+        let check_ball = true ;
+        if (checkTypeBall(ball,check_ball) === true) {
+            balls.push(ball);
+        }
     }
     // tuong loai 1
     if (count % 133 === 0 && stop === false && count % 17 !== 0) {
         let ball = new Ball();
+        let check_ball = true ;
         ball.radius = 20;
         ball.hp_ball = 3;
-        checkTypeBall(ball);
+        if (checkTypeBall(ball,check_ball) === true) {
+            balls.push(ball);
+        }
     }
     //binh loai 2
     if (count % 17 === 0 && stop === false && count % 23 !== 0) {
         let rect = new Rect();
-        let check_rect = true;
-        for (let i = 0; i < rects.length; i++) {
-            if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
-                check_rect = false;
-                break;
-            }
-        }
-        for (let i = 0; i < balls.length; i++) {
-            if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
-                check_rect = false;
-                break;
-            }
-        }
-        if (check_rect === true) {
+        let check_rect = true ;
+        if (checkTypeRect(rect,check_rect) === true) {
             rects.push(rect);
         }
     }
     //tuong loai 2
     if (count % 177 === 0 && stop === false && count % 23 !== 0) {
         let rect = new Rect();
+        let check_rect = true ;
         rect.length = 30;
         rect.width = 30;
         rect.hp_rect = 3;
-        let check_rect = true;
-        for (let i = 0; i < rects.length; i++) {
-            if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
-                check_rect = false;
-                break;
-            }
-        }
-        for (let i = 0; i < balls.length; i++) {
-            if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
-                check_rect = false;
-                break;
-            }
-        }
-        if (check_rect === true) {
+        if (checkTypeRect(rect,check_rect) === true) {
             rects.push(rect);
         }
     }
+}
 
+function loop() {
     count++;
+    selectEnemy();
     moveAll();
     drawAll();
     document.getElementById('hp').innerHTML = 'HP : ' + hp;
