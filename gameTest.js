@@ -18,6 +18,13 @@ let hp = 20;
 let point = 101;
 let stop = false;
 
+//Cach 1:Lay mau random
+// function getRandomColor() {
+//     let color = ["AABBCC", "11CCFF", "22DDCC", "AAFF22"];
+//     return "#" + color[Math.floor(Math.random() * 4)];
+//
+// }
+//Cach 2: Lay mau random
 function getRandomHex() {
     return Math.floor(Math.random() * 255)
 }
@@ -338,12 +345,133 @@ function loop() {
                     continue;
                 }
             }
+            //Cach2:
+            // if (Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)) < shots[j].radius + balls[i].radius) {
+            //     balls[i].hp_ball--;
+            //     if (balls[i].hp_ball === 0){
+            //         shots.splice(shots.indexOf(shots[j]), 1);
+            //         balls.splice(balls.indexOf(balls[i]), 1);
+            //         point++;
+            //     }
+            //     else {
+            //         // shots[j].speedY = -shots[j].speedY;
+            //         // shots[i].x += shots[i].speedX * shots[i].angle[0];
+            //         // shots[i].y -= shots[i].speedY * shots[i].angle[1];
+            //         shots.splice(shots.indexOf(shots[j]), 1);
+            //         point++;
+            //     }
+            // }
         }
     }
     //shot cham vao hinh vuong
     for (let j = 0; j < shots.length; j++) {
         for (let i = 0; i < rects.length; i++) {
-
+            //Cach 1:
+            // if (rects[i].x <= shots[j].x){
+            //     if ((shots[j].x - rects[i].x) <= (shots[j].radius + rects[i].length)){
+            //         //Cach 1:
+            //             if (Math.abs((shots[j].y - rects[i].y)) <= (shots[j].radius + rects[i].width)){
+            //                 rects[i].hp_rect--;
+            //                 if (rects[i].hp_rect === 0){
+            //                     shots.splice(shots.indexOf(shots[j]), 1);
+            //                     rects.splice(rects.indexOf(rects[i]), 1);
+            //                     point++;
+            //                 }
+            //                 else {
+            //                     // shots[j].speedY = -shots[j].speedY;
+            //                     // shots[j].x += shots[j].speedX * shots[j].angle[0];
+            //                     // shots[j].y -= shots[j].speedY * shots[j].angle[1];
+            //                     shots.splice(shots.indexOf(shots[j]), 1);
+            //                     point++;
+            //                 }
+            //             }else {
+            //              continue;
+            //             }
+            //         //Cach 2:
+            //         // if (rects[i].y <= shots[j].y){
+            //         //     if ((shots[j].y - rects[i].y) <= (shots[j].radius + rects[i].width)){
+            //         //         rects[i].hp_rect--;
+            //         //         if (rects[i].hp_rect === 0){
+            //         //             shots.splice(shots.indexOf(shots[j]), 1);
+            //         //             rects.splice(rects.indexOf(rects[i]), 1);
+            //         //             point++;
+            //         //         }
+            //         //         else {
+            //         //             // shots[j].speedY = -shots[j].speedY;
+            //         //             // shots[j].x += shots[j].speedX * shots[j].angle[0];
+            //         //             // shots[j].y -= shots[j].speedY * shots[j].angle[1];
+            //         //             shots.splice(shots.indexOf(shots[j]), 1);
+            //         //             point++;
+            //         //         }
+            //         //     }else {
+            //         //      continue;
+            //         //     }
+            //         // }else {
+            //         //     if ((rects[i].y - shots[j].y) <= (shots[j].radius + rects[i].width)){
+            //         //         rects[i].hp_rect--;
+            //         //         if (rects[i].hp_rect === 0){
+            //         //             shots.splice(shots.indexOf(shots[j]), 1);
+            //         //             rects.splice(rects.indexOf(rects[i]), 1);
+            //         //             point++;
+            //         //         }
+            //         //         else {
+            //         //             // shots[j].speedY = -shots[j].speedY;
+            //         //             // shots[j].x += shots[j].speedX * shots[j].angle[0];
+            //         //             // shots[j].y -= shots[j].speedY * shots[j].angle[1];
+            //         //             shots.splice(shots.indexOf(shots[j]), 1);
+            //         //             point++;
+            //         //         }
+            //         //     }else {
+            //         //         continue;
+            //         //     }
+            //         // }
+            //     }else {
+            //         continue;
+            //     }
+            // }else {
+            //     if ((rects[i].x - shots[j].x) <= shots[j].radius){
+            //         if (rects[i].y <= shots[j].y){
+            //             if ((shots[j].y - rects[i].y) <= (rects[i].width + shots[j].radius)){
+            //                 rects[i].hp_rect--;
+            //                 if (rects[i].hp_rect === 0){
+            //                     shots.splice(shots.indexOf(shots[j]), 1);
+            //                     rects.splice(rects.indexOf(rects[i]), 1);
+            //                     point++;
+            //                 }
+            //                 else {
+            //                     // shots[j].speedY = -shots[j].speedY;
+            //                     // shots[i].x += shots[i].speedX * shots[i].angle[0];
+            //                     // shots[i].y -= shots[i].speedY * shots[i].angle[1];
+            //                     shots.splice(shots.indexOf(shots[j]), 1);
+            //                     point++;
+            //                 }
+            //             }else {
+            //                 continue;
+            //             }
+            //         }else {
+            //             if ((rects[i].y - shots[j].y) <= shots[j].radius){
+            //                 rects[i].hp_rect--;
+            //                 if (rects[i].hp_rect === 0){
+            //                     shots.splice(shots.indexOf(shots[j]), 1);
+            //                     rects.splice(rects.indexOf(rects[i]), 1);
+            //                     point++;
+            //                 }
+            //                 else {
+            //                     // shots[j].speedY = -shots[j].speedY;
+            //                     // shots[i].x += shots[i].speedX * shots[i].angle[0];
+            //                     // shots[i].y -= shots[i].speedY * shots[i].angle[1];
+            //                     shots.splice(shots.indexOf(shots[j]), 1);
+            //                     point++;
+            //                 }
+            //             }else {
+            //                 continue;
+            //             }
+            //         }
+            //     }else {
+            //         continue;
+            //     }
+            // }
+            //Cach 2:
             if (shots[j].x >= rects[i].x && shots[j].x <= (rects[i].x + rects[i].length) && (shots[j].y - rects[i].y) <= rects[i].width) {
                 rects[i].hp_rect--;
                 if (rects[i].hp_rect === 0){
