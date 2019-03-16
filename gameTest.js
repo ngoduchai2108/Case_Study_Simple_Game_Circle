@@ -97,11 +97,7 @@ function moveAll() {
     }
 }
 
-function draw() {
-    pen.clearRect(0, 0, canvas.width, canvas.height);
-    pen.fillStyle = "#dddddd";
-    pen.fillRect(0, 0, canvas.width, canvas.height);
-    //drawGun
+function drawGun() {
     pen.fillStyle = "#aacc44";
     pen.strokeStyle = "#aacc44";
     pen.rect((VERY_RIGHT / 2) - 30, VERY_BUTTON - 60, 60, 60);
@@ -120,13 +116,9 @@ function draw() {
     valueY = 50 * angle[1];
     pen.lineTo(valueX + (VERY_RIGHT / 2), VERY_BUTTON - 60 - valueY);
     pen.stroke();
-    //drawShots
-    for (let i = 0; i < shots.length; i++) {
-        pen.fillStyle = "#aacc44";
-        pen.beginPath();
-        pen.arc(shots[i].x, shots[i].y, shots[i].radius, 0, 2 * Math.PI);
-        pen.fill();
-    }
+}
+
+function drawEnemy() {
     //drawBalls
     for (let i = 0; i < balls.length; i++) {
         pen.beginPath();
@@ -141,6 +133,24 @@ function draw() {
         pen.fillStyle = rects[i].color;
         pen.fill();
     }
+}
+
+function drawShots() {
+    for (let i = 0; i < shots.length; i++) {
+        pen.fillStyle = "#aacc44";
+        pen.beginPath();
+        pen.arc(shots[i].x, shots[i].y, shots[i].radius, 0, 2 * Math.PI);
+        pen.fill();
+    }
+}
+
+function draw() {
+    pen.clearRect(0, 0, canvas.width, canvas.height);
+    pen.fillStyle = "#dddddd";
+    pen.fillRect(0, 0, canvas.width, canvas.height);
+    drawGun();
+    drawEnemy();
+    drawShots();
 }
 
 function loop() {
