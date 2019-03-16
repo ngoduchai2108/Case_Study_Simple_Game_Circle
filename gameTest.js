@@ -18,13 +18,6 @@ let hp = 20;
 let point = 101;
 let stop = false;
 
-//Cach 1:Lay mau random
-// function getRandomColor() {
-//     let color = ["AABBCC", "11CCFF", "22DDCC", "AAFF22"];
-//     return "#" + color[Math.floor(Math.random() * 4)];
-//
-// }
-//Cach 2: Lay mau random
 function getRandomHex() {
     return Math.floor(Math.random() * 255)
 }
@@ -80,7 +73,8 @@ function moveShots() {
     }
 }
 
-function moveBall() {
+function moveEnemy() {
+    //move ball
     for (let i = 0; i < balls.length; i++) {
         balls[i].y += balls[i].speed;
         if (balls[i].y > VERY_BUTTON - 20) {
@@ -88,9 +82,7 @@ function moveBall() {
             hp--;
         }
     }
-}
-
-function moveRect() {
+    //move rect
     for (let i = 0; i < rects.length; i++) {
         rects[i].y += rects[i].speed;
         if (rects[i].y > VERY_BUTTON - 20) {
@@ -102,8 +94,7 @@ function moveRect() {
 
 function moveAll() {
     moveShots();
-    moveBall();
-    moveRect();
+    moveEnemy();
 }
 
 function drawGun() {
@@ -162,48 +153,37 @@ function drawAll() {
     drawShots();
 }
 
+function checkTypeBall(ball) {
+    let check_ball = true;
+    for (let i = 0; i < balls.length; i++) {
+        if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
+            check_ball = false;
+            break;
+        }
+    }
+    for (let i = 0; i < rects.length; i++) {
+        if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
+            check_ball = false;
+            break;
+        }
+    }
+    if (check_ball === true) {
+        balls.push(ball);
+    }
+}
+
 function loop() {
     //binh 1oai 1
     if (count % 23 === 0 && stop === false && count % 17 !== 0) {
         let ball = new Ball();
-        let check_ball = true;
-        for (let i = 0; i < balls.length; i++) {
-            if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
-                check_ball = false;
-                break;
-            }
-        }
-        for (let i = 0; i < rects.length; i++) {
-            if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
-                check_ball = false;
-                break;
-            }
-        }
-        if (check_ball === true) {
-            balls.push(ball);
-        }
+        checkTypeBall(ball);
     }
     // tuong loai 1
     if (count % 133 === 0 && stop === false && count % 17 !== 0) {
         let ball = new Ball();
         ball.radius = 20;
         ball.hp_ball = 3;
-        let check_ball = true;
-        for (let i = 0; i < balls.length; i++) {
-            if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
-                check_ball = false;
-                break;
-            }
-        }
-        for (let i = 0; i < rects.length; i++) {
-            if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
-                check_ball = false;
-                break;
-            }
-        }
-        if (check_ball === true) {
-            balls.push(ball);
-        }
+        checkTypeBall(ball);
     }
     //binh loai 2
     if (count % 17 === 0 && stop === false && count % 23 !== 0) {
