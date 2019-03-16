@@ -64,8 +64,7 @@ function degToRad(angle) {
     return angle * Math.PI / 180;
 }
 
-function moveAll() {
-    //With shots
+function moveShots() {
     for (let i = 0; i < shots.length; i++) {
         if (shots[i].x < shots[i].radius || shots[i].x > VERY_RIGHT - shots[i].radius) {
             shots[i].speedX = -shots[i].speedX;
@@ -79,7 +78,9 @@ function moveAll() {
         shots[i].x += shots[i].speedX * shots[i].angle[0];
         shots[i].y -= shots[i].speedY * shots[i].angle[1];
     }
-    //With ball
+}
+
+function moveBall() {
     for (let i = 0; i < balls.length; i++) {
         balls[i].y += balls[i].speed;
         if (balls[i].y > VERY_BUTTON - 20) {
@@ -87,7 +88,9 @@ function moveAll() {
             hp--;
         }
     }
-    //With rect
+}
+
+function moveRect() {
     for (let i = 0; i < rects.length; i++) {
         rects[i].y += rects[i].speed;
         if (rects[i].y > VERY_BUTTON - 20) {
@@ -95,6 +98,12 @@ function moveAll() {
             hp--;
         }
     }
+}
+
+function moveAll() {
+    moveShots();
+    moveBall();
+    moveRect();
 }
 
 function drawGun() {
@@ -144,7 +153,7 @@ function drawShots() {
     }
 }
 
-function draw() {
+function drawAll() {
     pen.clearRect(0, 0, canvas.width, canvas.height);
     pen.fillStyle = "#dddddd";
     pen.fillRect(0, 0, canvas.width, canvas.height);
@@ -242,7 +251,7 @@ function loop() {
 
     count++;
     moveAll();
-    draw();
+    drawAll();
     document.getElementById('hp').innerHTML = 'HP : ' + hp;
     document.getElementById('point').innerHTML = 'Point : ' + point;
     //Dieu kien Game Over
