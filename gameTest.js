@@ -199,7 +199,25 @@ function checkTypeRect(rect,check_ball,check_rect) {
         }
     }
     for (let i = 0; i < balls.length; i++) {
-        if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
+        // if left_right >=0 then rect at left of ball, else rect at right of ball
+        let left_right = balls[i].x - rect.x;
+        // if above_under >=0 then rect at above of ball, else rect at under of ball
+        let above_under = balls[i].y - rect.y;
+        let dx = Math.abs(balls[i].x - rect.x);
+        let dy = Math.abs(balls[i].y - rect.y);
+        if (left_right >=0 && above_under >= 0 && dx <= (rect.length + balls[i].radius) && dy <= (rect.width + balls[i].radius)) {
+            check_ball = false;
+            break;
+        }
+        if (left_right >=0 && above_under <= 0 && dx <= (rect.length + balls[i].radius) && dy <= balls[i].radius) {
+            check_ball = false;
+            break;
+        }
+        if (left_right <=0 && above_under >= 0 && dx <= balls[i].radius && dy <= (rect.width + balls[i].radius)) {
+            check_ball = false;
+            break;
+        }
+        if (left_right <=0 && above_under <= 0 && dx <= balls[i].radius && dy <= balls[i].radius) {
             check_ball = false;
             break;
         }
