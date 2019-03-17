@@ -279,8 +279,6 @@ function selectEnemy() {
     }
 }
 
-drawAll();
-
 function loop() {
     count++;
     selectEnemy();
