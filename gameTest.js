@@ -10,11 +10,11 @@ let pen = canvas.getContext('2d');
 let mouseDown = false;
 let gloop;
 let shots = [];
-let gun = new Gun();
-let balls = [];
 let rects = [];
+let balls = [];
+let gun = new Gun();
 let count = 0;
-let hp = 20;
+let hp = 200;
 let point = 101;
 let stop = false;
 
@@ -59,6 +59,8 @@ function degToRad(angle) {
 
 function moveShots() {
     for (let i = 0; i < shots.length; i++) {
+        shots[i].x += shots[i].speedX * shots[i].angle[0];
+        shots[i].y -= shots[i].speedY * shots[i].angle[1];
         if (shots[i].x < shots[i].radius || shots[i].x > VERY_RIGHT - shots[i].radius) {
             shots[i].speedX = -shots[i].speedX;
         }
@@ -68,8 +70,6 @@ function moveShots() {
         if (shots[i].y < 0 || shots[i].y > VERY_BUTTON - shots[i].radius) {
             shots.splice(shots.indexOf(shots[i]), 1);
         }
-        shots[i].x += shots[i].speedX * shots[i].angle[0];
-        shots[i].y -= shots[i].speedY * shots[i].angle[1];
     }
 }
 
@@ -137,10 +137,7 @@ function drawEnemy() {
 
 function drawShots() {
     for (let i = 0; i < shots.length; i++) {
-        pen.fillStyle = "#aacc44";
-        pen.beginPath();
-        pen.arc(shots[i].x, shots[i].y, shots[i].radius, 0, 2 * Math.PI);
-        pen.fill();
+        shots[i].draw();
     }
 }
 
@@ -156,9 +153,14 @@ function drawAll() {
 function checkTypeBall(ball,check_ball,check_rect) {
     check_ball = true;
     check_rect = true;
+    let index_ball = 0;
+    let index_rect = 0;
     for (let i = 0; i < balls.length; i++) {
-        if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
+        let dx = Math.abs(ball.x - balls[i].x);
+        let dy = Math.abs(ball.y - balls[i].y);
+        if (dx <= (ball.radius + balls[i].radius) && dy <= (ball.radius + balls[i].radius)) {
             check_ball = false;
+            index_ball = i;
             break;
         }
     }
@@ -171,22 +173,26 @@ function checkTypeBall(ball,check_ball,check_rect) {
         let dy = Math.abs(ball.y - rects[i].y);
         if (left_right >=0 && above_under >= 0 && dx <= (rects[i].length + ball.radius) && dy <= (rects[i].width + ball.radius)) {
             check_rect = false;
+            index_rect = i;
             break;
         }
         if (left_right >=0 && above_under <= 0 && dx <= (rects[i].length + ball.radius) && dy <= rects[i].width ) {
             check_rect = false;
+            index_rect = i;
             break;
         }
         if (left_right <=0 && above_under >= 0 && dx <= ball.radius && dy <= (rects[i].width + ball.radius)) {
             check_rect = false;
+            index_rect = i;
             break;
         }
         if (left_right <=0 && above_under <= 0 && dx <= ball.radius && dy <= ball.radius) {
             check_rect = false;
+            index_rect = i;
             break;
         }
     }
-    return [check_ball,check_rect];
+    return [check_ball,check_rect,index_ball,index_rect];
 }
 
 function checkTypeRect(rect,check_ball,check_rect) {
@@ -241,9 +247,9 @@ function selectEnemy() {
         let ball = new Ball();
         let check_ball = true ;
         let check_rect = true;
-        let check = checkTypeBall(ball,check_ball,check_rect);
         ball.radius = 20;
         ball.hp_ball = 3;
+        let check = checkTypeBall(ball,check_ball,check_rect);
         if ( check[0] === true && check[1] === true) {
             balls.push(ball);
         }
@@ -263,16 +269,16 @@ function selectEnemy() {
         let rect = new Rect();
         let check_rect = true ;
         let check_ball = true;
-        let check = checkTypeRect(rect,check_ball,check_rect);
         rect.length = 30;
         rect.width = 30;
         rect.hp_rect = 3;
+        let check = checkTypeRect(rect,check_ball,check_rect);
         if (check[0] === true && check[1] === true) {
             rects.push(rect);
         }
     }
 }
-
+drawAll();
 function loop() {
     count++;
     selectEnemy();
@@ -305,234 +311,87 @@ function loop() {
             rects[i].speed = rects[i].speed * 21 / 20;
         }
     }
-    //shot cham vao hinh tron
-    for (let j = 0; j < shots.length; j++) {
-        for (let i = 0; i < balls.length; i++) {
-            //Cach 1:
-            if (balls[i].x < shots[j].x) {
-                if ((shots[j].x - balls[i].x) <= (shots[j].radius + balls[i].radius)) {
-                    if (shots[j].y >= balls[i].y) {
-                        if ((shots[j].y - balls[i].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                // shots[j].speedY = -shots[j].speedY;
-                                // shots[i].x += shots[i].speedX * shots[i].angle[0];
-                                // shots[i].y -= shots[i].speedY * shots[i].angle[1];
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
+    //shot gun ball and rect
 
-                        }
-                    } else {
-                        if ((balls[i].y - shots[j].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                // shots[j].speedY = -shots[j].speedY;
-                                // shots[j].x += shots[j].speedX * shots[j].angle[0];
-                                // shots[j].y -= shots[j].speedY * shots[j].angle[1];
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
-
-                        }
-                    }
-                } else {
-
-                }
-            } else {
-                if ((balls[i].x - shots[j].x) <= (shots[j].radius + balls[i].radius)) {
-                    if (shots[j].y >= balls[i].y) {
-                        if ((shots[j].y - balls[i].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                // shots[j].speedY = -shots[j].speedY;
-                                // shots[j].x += shots[j].speedX * shots[j].angle[0];
-                                // shots[j].y -= shots[j].speedY * shots[j].angle[1];
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
-
-                        }
-                    } else {
-                        if ((balls[i].y - shots[j].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                // shots[j].speedY = -shots[j].speedY;
-                                // shots[i].x += shots[i].speedX * shots[i].angle[0];
-                                // shots[i].y -= shots[i].speedY * shots[i].angle[1];
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
-
-                        }
-                    }
-                } else {
-
-                }
+    for (let i = 0; i< shots.length ; i++){
+        let check_ball = true;
+        let check_rect = true;
+        let check = checkTypeBall(shots[i],check_ball,check_rect);
+        if (check[0] === false){
+            balls[check[2]].hp_ball--;
+            if (balls[check[2]].hp_ball === 0){
+                shots.splice(shots.indexOf(shots[i]),1);
+                balls.splice(balls.indexOf(balls[check[2]]),1);
+                point++;
             }
-            //Cach2:
-            // if (Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)) < shots[j].radius + balls[i].radius) {
-            //     balls[i].hp_ball--;
-            //     if (balls[i].hp_ball === 0){
-            //         shots.splice(shots.indexOf(shots[j]), 1);
-            //         balls.splice(balls.indexOf(balls[i]), 1);
-            //         point++;
-            //     }
-            //     else {
-            //         // shots[j].speedY = -shots[j].speedY;
-            //         // shots[i].x += shots[i].speedX * shots[i].angle[0];
-            //         // shots[i].y -= shots[i].speedY * shots[i].angle[1];
-            //         shots.splice(shots.indexOf(shots[j]), 1);
-            //         point++;
-            //     }
-            // }
+            else {
+                shots.splice(shots.indexOf(shots[i]),1);
+                point++;
+            }
+            break;
+        }
+        if (check[1] === false){
+            rects[check[3]].hp_rect--;
+            if (rects[check[3]].hp_rect === 0){
+                shots.splice(shots.indexOf(shots[i]),1);
+                rects.splice(rects.indexOf(rects[check[3]]),1);
+                point++;
+            }else {
+                shots.splice(shots.indexOf(shots[i]),1);
+                point++;
+            }
+            break;
         }
     }
-    //shot cham vao hinh vuong
-    for (let j = 0; j < shots.length; j++) {
-        for (let i = 0; i < rects.length; i++) {
-            //Cach 1:
-            // if (rects[i].x <= shots[j].x){
-            //     if ((shots[j].x - rects[i].x) <= (shots[j].radius + rects[i].length)){
-            //         //Cach 1:
-            //             if (Math.abs((shots[j].y - rects[i].y)) <= (shots[j].radius + rects[i].width)){
-            //                 rects[i].hp_rect--;
-            //                 if (rects[i].hp_rect === 0){
-            //                     shots.splice(shots.indexOf(shots[j]), 1);
-            //                     rects.splice(rects.indexOf(rects[i]), 1);
-            //                     point++;
-            //                 }
-            //                 else {
-            //                     // shots[j].speedY = -shots[j].speedY;
-            //                     // shots[j].x += shots[j].speedX * shots[j].angle[0];
-            //                     // shots[j].y -= shots[j].speedY * shots[j].angle[1];
-            //                     shots.splice(shots.indexOf(shots[j]), 1);
-            //                     point++;
-            //                 }
-            //             }else {
-            //              continue;
-            //             }
-            //         //Cach 2:
-            //         // if (rects[i].y <= shots[j].y){
-            //         //     if ((shots[j].y - rects[i].y) <= (shots[j].radius + rects[i].width)){
-            //         //         rects[i].hp_rect--;
-            //         //         if (rects[i].hp_rect === 0){
-            //         //             shots.splice(shots.indexOf(shots[j]), 1);
-            //         //             rects.splice(rects.indexOf(rects[i]), 1);
-            //         //             point++;
-            //         //         }
-            //         //         else {
-            //         //             // shots[j].speedY = -shots[j].speedY;
-            //         //             // shots[j].x += shots[j].speedX * shots[j].angle[0];
-            //         //             // shots[j].y -= shots[j].speedY * shots[j].angle[1];
-            //         //             shots.splice(shots.indexOf(shots[j]), 1);
-            //         //             point++;
-            //         //         }
-            //         //     }else {
-            //         //      continue;
-            //         //     }
-            //         // }else {
-            //         //     if ((rects[i].y - shots[j].y) <= (shots[j].radius + rects[i].width)){
-            //         //         rects[i].hp_rect--;
-            //         //         if (rects[i].hp_rect === 0){
-            //         //             shots.splice(shots.indexOf(shots[j]), 1);
-            //         //             rects.splice(rects.indexOf(rects[i]), 1);
-            //         //             point++;
-            //         //         }
-            //         //         else {
-            //         //             // shots[j].speedY = -shots[j].speedY;
-            //         //             // shots[j].x += shots[j].speedX * shots[j].angle[0];
-            //         //             // shots[j].y -= shots[j].speedY * shots[j].angle[1];
-            //         //             shots.splice(shots.indexOf(shots[j]), 1);
-            //         //             point++;
-            //         //         }
-            //         //     }else {
-            //         //         continue;
-            //         //     }
-            //         // }
-            //     }else {
-            //         continue;
-            //     }
-            // }else {
-            //     if ((rects[i].x - shots[j].x) <= shots[j].radius){
-            //         if (rects[i].y <= shots[j].y){
-            //             if ((shots[j].y - rects[i].y) <= (rects[i].width + shots[j].radius)){
-            //                 rects[i].hp_rect--;
-            //                 if (rects[i].hp_rect === 0){
-            //                     shots.splice(shots.indexOf(shots[j]), 1);
-            //                     rects.splice(rects.indexOf(rects[i]), 1);
-            //                     point++;
-            //                 }
-            //                 else {
-            //                     // shots[j].speedY = -shots[j].speedY;
-            //                     // shots[i].x += shots[i].speedX * shots[i].angle[0];
-            //                     // shots[i].y -= shots[i].speedY * shots[i].angle[1];
-            //                     shots.splice(shots.indexOf(shots[j]), 1);
-            //                     point++;
-            //                 }
-            //             }else {
-            //                 continue;
-            //             }
-            //         }else {
-            //             if ((rects[i].y - shots[j].y) <= shots[j].radius){
-            //                 rects[i].hp_rect--;
-            //                 if (rects[i].hp_rect === 0){
-            //                     shots.splice(shots.indexOf(shots[j]), 1);
-            //                     rects.splice(rects.indexOf(rects[i]), 1);
-            //                     point++;
-            //                 }
-            //                 else {
-            //                     // shots[j].speedY = -shots[j].speedY;
-            //                     // shots[i].x += shots[i].speedX * shots[i].angle[0];
-            //                     // shots[i].y -= shots[i].speedY * shots[i].angle[1];
-            //                     shots.splice(shots.indexOf(shots[j]), 1);
-            //                     point++;
-            //                 }
-            //             }else {
-            //                 continue;
-            //             }
-            //         }
-            //     }else {
-            //         continue;
-            //     }
-            // }
-            //Cach 2:
-            if (shots[j].x >= rects[i].x && shots[j].x <= (rects[i].x + rects[i].length) && (shots[j].y - rects[i].y) <= rects[i].width) {
-                rects[i].hp_rect--;
-                if (rects[i].hp_rect === 0) {
-                    shots.splice(shots.indexOf(shots[j]), 1);
-                    rects.splice(rects.indexOf(rects[i]), 1);
-                    point++;
-                } else {
-                    // shots[j].speedY = -shots[j].speedY;
-                    // shots[j].x += shots[j].speedX * shots[j].angle[0];
-                    // shots[j].y -= shots[j].speedY * shots[j].angle[1];
-                    shots.splice(shots.indexOf(shots[j]), 1);
-                    point++;
-                }
-            }
-        }
-    }
+
+
+
+    // //shot cham vao hinh tron
+    // for (let j = 0; j < shots.length; j++) {
+    //     for (let i = 0; i < balls.length; i++) {
+    //
+    //         //Cach2:
+    //
+    //         if (Math.sqrt(Math.pow((balls[i].x - shots[j].x), 2) + Math.pow((balls[i].y - shots[j].y), 2)) < shots[j].radius + balls[i].radius) {
+    //             balls[i].hp_ball--;
+    //             if (balls[i].hp_ball === 0){
+    //                 shots.splice(shots.indexOf(shots[j]), 1);
+    //                 balls.splice(balls.indexOf(balls[i]), 1);
+    //                 point++;
+    //             }
+    //             else {
+    //                 // shots[j].speedY = -shots[j].speedY;
+    //                 // shots[i].x += shots[i].speedX * shots[i].angle[0];
+    //                 // shots[i].y -= shots[i].speedY * shots[i].angle[1];
+    //                 shots.splice(shots.indexOf(shots[j]), 1);
+    //                 point++;
+    //             }
+    //             break;
+    //         }
+    //     }
+    // }
+    // //shot cham vao hinh vuong
+    // for (let j = 0; j < shots.length; j++) {
+    //     for (let i = 0; i < rects.length; i++) {
+    //
+    //         //Cach 2:
+    //         if (shots[j].x >= rects[i].x && shots[j].x <= (rects[i].x + rects[i].length) && (shots[j].y - rects[i].y) <= rects[i].width) {
+    //             rects[i].hp_rect--;
+    //             if (rects[i].hp_rect === 0) {
+    //                 shots.splice(shots.indexOf(shots[j]), 1);
+    //                 rects.splice(rects.indexOf(rects[i]), 1);
+    //                 point++;
+    //             } else {
+    //                 // shots[j].speedY = -shots[j].speedY;
+    //                 // shots[j].x += shots[j].speedX * shots[j].angle[0];
+    //                 // shots[j].y -= shots[j].speedY * shots[j].angle[1];
+    //                 shots.splice(shots.indexOf(shots[j]), 1);
+    //                 point++;
+    //             }
+    //             break;
+    //         }
+    //     }
+    // }
     gloop = setTimeout(loop, 25);
 }
 
