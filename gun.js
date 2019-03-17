@@ -11,4 +11,11 @@ const Shots = function (shotX, shotY) {
     this.speedX = 8;
     this.speedY = 8;
     this.angle = getAngle(shotX, shotY);
+    this.draw = function () {
+        pen.fillStyle = "#aacc44";
+        pen.beginPath();
+        pen.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        // console.log(this.x,VERY_RIGHT / 2);
+        pen.fill();
+    }
 };

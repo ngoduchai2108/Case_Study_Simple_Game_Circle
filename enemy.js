@@ -16,3 +16,4 @@ const Ball = function () {
     this.color = getRandomColor();
     this.hp_ball = 1;
 };
+

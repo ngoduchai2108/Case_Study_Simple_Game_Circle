@@ -10,11 +10,11 @@ let pen = canvas.getContext('2d');
 let mouseDown = false;
 let gloop;
 let shots = [];
-let gun = new Gun();
-let balls = [];
 let rects = [];
+let balls = [];
+let gun = new Gun();
 let count = 0;
-let hp = 20;
+let hp = 200;
 let point = 101;
 let stop = false;
 
@@ -48,7 +48,7 @@ function getAngle(coordx, coordy) {
     if (neg) {
         angleX = -angleX;
         angleY = -angleY;
-        neg = false;
+        // neg = false;
     }
     return [angleX, angleY];
 }
@@ -57,20 +57,24 @@ function degToRad(angle) {
     return angle * Math.PI / 180;
 }
 
-function moveAll() {
+function moveShots() {
     for (let i = 0; i < shots.length; i++) {
+        shots[i].x += shots[i].speedX * shots[i].angle[0];
+        shots[i].y -= shots[i].speedY * shots[i].angle[1];
         if (shots[i].x < shots[i].radius || shots[i].x > VERY_RIGHT - shots[i].radius) {
             shots[i].speedX = -shots[i].speedX;
         }
-        if (shots[i].y > VERY_BUTTON - shots[i].radius) {
-            shots[i].speedY = -shots[i].speedY;
-        }
-        if (shots[i].y < 0) {
+        // if (shots[i].y > VERY_BUTTON - shots[i].radius) {
+        //     shots[i].speedY = -shots[i].speedY;
+        // }
+        if (shots[i].y < 0 || shots[i].y > VERY_BUTTON - shots[i].radius) {
             shots.splice(shots.indexOf(shots[i]), 1);
         }
-        shots[i].x += shots[i].speedX * shots[i].angle[0];
-        shots[i].y -= shots[i].speedY * shots[i].angle[1];
     }
+}
+
+function moveEnemy() {
+    //move ball
     for (let i = 0; i < balls.length; i++) {
         balls[i].y += balls[i].speed;
         if (balls[i].y > VERY_BUTTON - 20) {
@@ -78,6 +82,7 @@ function moveAll() {
             hp--;
         }
     }
+    //move rect
     for (let i = 0; i < rects.length; i++) {
         rects[i].y += rects[i].speed;
         if (rects[i].y > VERY_BUTTON - 20) {
@@ -87,14 +92,15 @@ function moveAll() {
     }
 }
 
-function draw() {
-    pen.clearRect(0, 0, canvas.width, canvas.height);
-    pen.fillStyle = "#dddddd";
-    pen.fillRect(0, 0, canvas.width, canvas.height);
-    //drawGun
+function moveAll() {
+    moveShots();
+    moveEnemy();
+}
+
+function drawGun() {
     pen.fillStyle = "#aacc44";
     pen.strokeStyle = "#aacc44";
-    pen.rect((VERY_RIGHT / 2) - 20, VERY_BUTTON - 60, 40, 60);
+    pen.rect((VERY_RIGHT / 2) - 30, VERY_BUTTON - 60, 60, 60);
     pen.fill();
 
     pen.beginPath();
@@ -110,13 +116,9 @@ function draw() {
     valueY = 50 * angle[1];
     pen.lineTo(valueX + (VERY_RIGHT / 2), VERY_BUTTON - 60 - valueY);
     pen.stroke();
-    //drawShots
-    for (let i = 0; i < shots.length; i++) {
-        pen.fillStyle = "#aacc44";
-        pen.beginPath();
-        pen.arc(shots[i].x, shots[i].y, shots[i].radius, 0, 2 * Math.PI);
-        pen.fill();
-    }
+}
+
+function drawEnemy() {
     //drawBalls
     for (let i = 0; i < balls.length; i++) {
         pen.beginPath();
@@ -133,46 +135,122 @@ function draw() {
     }
 }
 
-function loop() {
+function drawShots() {
+    for (let i = 0; i < shots.length; i++) {
+        shots[i].draw();
+    }
+}
+
+function drawAll() {
+    pen.clearRect(0, 0, canvas.width, canvas.height);
+    pen.fillStyle = "#dddddd";
+    pen.fillRect(0, 0, canvas.width, canvas.height);
+    drawGun();
+    drawEnemy();
+    drawShots();
+}
+
+function checkTypeBall(ball, check_ball, check_rect) {
+    check_ball = true;
+    check_rect = true;
+    let index_ball = 0;
+    let index_rect = 0;
+    for (let i = 0; i < balls.length; i++) {
+        let dx = Math.abs(ball.x - balls[i].x);
+        let dy = Math.abs(ball.y - balls[i].y);
+        if (dx <= (ball.radius + balls[i].radius) && dy <= (ball.radius + balls[i].radius)) {
+            check_ball = false;
+            index_ball = i;
+            break;
+        }
+    }
+    for (let i = 0; i < rects.length; i++) {
+        // if left_right >=0 then rect at left of ball, else rect at right of ball
+        let left_right = ball.x - rects[i].x;
+        // if above_under >=0 then rect at above of ball, else rect at under of ball
+        let above_under = ball.y - rects[i].y;
+        let dx = Math.abs(ball.x - rects[i].x);
+        let dy = Math.abs(ball.y - rects[i].y);
+        if (left_right >= 0 && above_under >= 0 && dx <= (rects[i].length + ball.radius) && dy <= (rects[i].width + ball.radius)) {
+            check_rect = false;
+            index_rect = i;
+            break;
+        }
+        if (left_right >= 0 && above_under <= 0 && dx <= (rects[i].length + ball.radius) && dy <= rects[i].width) {
+            check_rect = false;
+            index_rect = i;
+            break;
+        }
+        if (left_right <= 0 && above_under >= 0 && dx <= ball.radius && dy <= (rects[i].width + ball.radius)) {
+            check_rect = false;
+            index_rect = i;
+            break;
+        }
+        if (left_right <= 0 && above_under <= 0 && dx <= ball.radius && dy <= ball.radius) {
+            check_rect = false;
+            index_rect = i;
+            break;
+        }
+    }
+    return [check_ball, check_rect, index_ball, index_rect];
+}
+
+function checkTypeRect(rect, check_ball, check_rect) {
+    check_ball = true;
+    check_rect = true;
+    for (let i = 0; i < rects.length; i++) {
+        if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
+            check_rect = false;
+            break;
+        }
+    }
+    for (let i = 0; i < balls.length; i++) {
+        // if left_right >=0 then rect at left of ball, else rect at right of ball
+        let left_right = balls[i].x - rect.x;
+        // if above_under >=0 then rect at above of ball, else rect at under of ball
+        let above_under = balls[i].y - rect.y;
+        let dx = Math.abs(balls[i].x - rect.x);
+        let dy = Math.abs(balls[i].y - rect.y);
+        if (left_right >= 0 && above_under >= 0 && dx <= (rect.length + balls[i].radius) && dy <= (rect.width + balls[i].radius)) {
+            check_ball = false;
+            break;
+        }
+        if (left_right >= 0 && above_under <= 0 && dx <= (rect.length + balls[i].radius) && dy <= balls[i].radius) {
+            check_ball = false;
+            break;
+        }
+        if (left_right <= 0 && above_under >= 0 && dx <= balls[i].radius && dy <= (rect.width + balls[i].radius)) {
+            check_ball = false;
+            break;
+        }
+        if (left_right <= 0 && above_under <= 0 && dx <= balls[i].radius && dy <= balls[i].radius) {
+            check_ball = false;
+            break;
+        }
+    }
+    return [check_ball, check_rect];
+}
+
+function selectEnemy() {
     //binh 1oai 1
     if (count % 23 === 0 && stop === false && count % 17 !== 0) {
         let ball = new Ball();
         let check_ball = true;
-        for (let i = 0; i < balls.length; i++) {
-            if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
-                check_ball = false;
-                break;
-            }
-        }
-        for (let i = 0; i < rects.length; i++) {
-            if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
-                check_ball = false;
-                break;
-            }
-        }
-        if (check_ball === true) {
+        let check_rect = true;
+        let check = checkTypeBall(ball, check_ball, check_rect);
+        if (check[0] === true && check[1] === true) {
             balls.push(ball);
         }
     }
     // tuong loai 1
     if (count % 133 === 0 && stop === false && count % 17 !== 0) {
         let ball = new Ball();
+        let check_ball = true;
+        let check_rect = true;
         ball.radius = 20;
         ball.hp_ball = 3;
-        let check_ball = true;
-        for (let i = 0; i < balls.length; i++) {
-            if (Math.sqrt(Math.pow((ball.x - balls[i].x), 2) + Math.pow((ball.y - balls[i].y), 2)) < ball.radius + balls[i].radius) {
-                check_ball = false;
-                break;
-            }
-        }
-        for (let i = 0; i < rects.length; i++) {
-            if ((ball.x >= rects[i].x && ball.radius >= rects[i].y && (ball.x - rects[i].x) <= (ball.radius + rects[i].length)) || (ball.x <= rects[i].x && rects[i].y <= ball.radius && (rects[i].x - ball.x) <= rects[i].length)) {
-                check_ball = false;
-                break;
-            }
-        }
-        if (check_ball === true) {
+        let check = checkTypeBall(ball, check_ball, check_rect);
+        if (check[0] === true && check[1] === true) {
             balls.push(ball);
         }
     }
@@ -180,49 +258,34 @@ function loop() {
     if (count % 17 === 0 && stop === false && count % 23 !== 0) {
         let rect = new Rect();
         let check_rect = true;
-        for (let i = 0; i < rects.length; i++) {
-            if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
-                check_rect = false;
-                break;
-            }
-        }
-        for (let i = 0; i < balls.length; i++) {
-            if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
-                check_rect = false;
-                break;
-            }
-        }
-        if (check_rect === true) {
+        let check_ball = true;
+        let check = checkTypeRect(rect, check_ball, check_rect);
+        if (check[0] === true && check[1] === true) {
             rects.push(rect);
         }
     }
     //tuong loai 2
     if (count % 177 === 0 && stop === false && count % 23 !== 0) {
         let rect = new Rect();
+        let check_rect = true;
+        let check_ball = true;
         rect.length = 30;
         rect.width = 30;
         rect.hp_rect = 3;
-        let check_rect = true;
-        for (let i = 0; i < rects.length; i++) {
-            if (Math.abs(rects[i].x - rect.x) <= rects[i].length && (rects[i].y - rect.y) <= rects[i].width) {
-                check_rect = false;
-                break;
-            }
-        }
-        for (let i = 0; i < balls.length; i++) {
-            if ((rect.x >= balls[i].x && (rect.width + balls[i].radius) >= balls[i].y && (rect.x - balls[i].x) <= balls[i].radius) || (rect.x <= balls[i].x && balls[i].y <= (rect.width + balls[i].radius) && (balls[i].x - rect.x) <= (balls[i].radius + rect.length))) {
-                check_rect = false;
-                break;
-            }
-        }
-        if (check_rect === true) {
+        let check = checkTypeRect(rect, check_ball, check_rect);
+        if (check[0] === true && check[1] === true) {
             rects.push(rect);
         }
     }
+}
 
+drawAll();
+
+function loop() {
     count++;
+    selectEnemy();
     moveAll();
-    draw();
+    drawAll();
     document.getElementById('hp').innerHTML = 'HP : ' + hp;
     document.getElementById('point').innerHTML = 'Point : ' + point;
     //Dieu kien Game Over
@@ -250,111 +313,35 @@ function loop() {
             rects[i].speed = rects[i].speed * 21 / 20;
         }
     }
-    //shot cham vao hinh tron
-    for (let j = 0; j < shots.length; j++) {
-        for (let i = 0; i < balls.length; i++) {
-            //Cach 1:
-            if (balls[i].x < shots[j].x) {
-                if ((shots[j].x - balls[i].x) <= (shots[j].radius + balls[i].radius)) {
-                    if (shots[j].y >= balls[i].y) {
-                        if ((shots[j].y - balls[i].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                // shots[j].speedY = -shots[j].speedY;
-                                // shots[i].x += shots[i].speedX * shots[i].angle[0];
-                                // shots[i].y -= shots[i].speedY * shots[i].angle[1];
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
+    //shot gun ball and rect
 
-                        }
-                    } else {
-                        if ((balls[i].y - shots[j].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                shots[j].speedY = -shots[j].speedY;
-                                shots[j].x += shots[j].speedX * shots[j].angle[0];
-                                shots[j].y -= shots[j].speedY * shots[j].angle[1];
-                                // shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
-
-                        }
-                    }
-                } else {
-
-                }
+    for (let i = 0; i < shots.length; i++) {
+        let check_ball = true;
+        let check_rect = true;
+        let check = checkTypeBall(shots[i], check_ball, check_rect);
+        if (check[0] === false) {
+            balls[check[2]].hp_ball--;
+            if (balls[check[2]].hp_ball === 0) {
+                shots.splice(shots.indexOf(shots[i]), 1);
+                balls.splice(balls.indexOf(balls[check[2]]), 1);
+                point++;
             } else {
-                if ((balls[i].x - shots[j].x) <= (shots[j].radius + balls[i].radius)) {
-                    if (shots[j].y >= balls[i].y) {
-                        if ((shots[j].y - balls[i].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                shots[j].speedY = -shots[j].speedY;
-                                shots[j].x += shots[j].speedX * shots[j].angle[0];
-                                shots[j].y -= shots[j].speedY * shots[j].angle[1];
-                                // shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
-
-                        }
-                    } else {
-                        if ((balls[i].y - shots[j].y) <= (shots[j].radius + balls[i].radius)) {
-                            balls[i].hp_ball--;
-                            if (balls[i].hp_ball === 0) {
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                balls.splice(balls.indexOf(balls[i]), 1);
-                                point++;
-                            } else {
-                                // shots[j].speedY = -shots[j].speedY;
-                                // shots[i].x += shots[i].speedX * shots[i].angle[0];
-                                // shots[i].y -= shots[i].speedY * shots[i].angle[1];
-                                shots.splice(shots.indexOf(shots[j]), 1);
-                                point++;
-                            }
-                        } else {
-
-                        }
-                    }
-                } else {
-
-                }
+                shots.splice(shots.indexOf(shots[i]), 1);
+                point++;
             }
+            break;
         }
-    }
-    //shot cham vao hinh vuong
-    for (let j = 0; j < shots.length; j++) {
-        for (let i = 0; i < rects.length; i++) {
-
-            if (shots[j].x >= rects[i].x && shots[j].x <= (rects[i].x + rects[i].length) && (shots[j].y - rects[i].y) <= rects[i].width) {
-                rects[i].hp_rect--;
-                if (rects[i].hp_rect === 0) {
-                    shots.splice(shots.indexOf(shots[j]), 1);
-                    rects.splice(rects.indexOf(rects[i]), 1);
-                    point++;
-                } else {
-                    shots[j].speedY = -shots[j].speedY;
-                    shots[j].x += shots[j].speedX * shots[j].angle[0];
-                    shots[j].y -= shots[j].speedY * shots[j].angle[1];
-                    // shots.splice(shots.indexOf(shots[j]), 1);
-                    point++;
-                }
+        if (check[1] === false) {
+            rects[check[3]].hp_rect--;
+            if (rects[check[3]].hp_rect === 0) {
+                shots.splice(shots.indexOf(shots[i]), 1);
+                rects.splice(rects.indexOf(rects[check[3]]), 1);
+                point++;
+            } else {
+                shots.splice(shots.indexOf(shots[i]), 1);
+                point++;
             }
+            break;
         }
     }
     gloop = setTimeout(loop, 25);
@@ -379,7 +366,7 @@ canvas.addEventListener('mousedown', function (e) {
     shots.push(new Shots(shotX, shotY));
     mouseDown = true;
 });
-canvas.addEventListener('mouseup', function (e) {
+canvas.addEventListener('mouseup', function () {
     mouseDown = false;
 });
 
