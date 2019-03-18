@@ -12,9 +12,10 @@ let gloop;
 let shots = [];
 let rects = [];
 let balls = [];
+let ballenemy = [];
 let gun = new Gun();
 let count = 0;
-let hp = 200;
+let hp = 2000;
 let point = 101;
 let stop = false;
 
@@ -76,10 +77,51 @@ function moveShots() {
 function moveEnemy() {
     //move ball
     for (let i = 0; i < balls.length; i++) {
-        balls[i].y += balls[i].speed;
+        balls[i].x += balls[i].speedX;
+        balls[i].y += balls[i].speedY;
+        let check_ball = true;
+        let check_rect = true;
+        let check = checkTypeBall(balls[i],check_ball,check_rect);
+        if (check[2] === false ){
+            balls[i].speedX = -balls[i].speedX;
+        }
+        // if (check[0] === false && check[1] === true){
+        //     balls[i].speedX = -balls[i].speedX;
+        // }
+
         if (balls[i].y > VERY_BUTTON - 20) {
             balls.splice(balls.indexOf(balls[i]), 1);
             hp--;
+        }
+        // khoang cach ball with gun
+        let dx = Math.abs(balls[i].x - (VERY_RIGHT / 2));
+        let dy = Math.abs(balls[i].y - (VERY_BUTTON - 60));
+        if (dx <= (80 + balls[i].radius) && dy <= (80 + balls[i].radius)){
+            balls.splice(balls.indexOf(balls[i]), 1);
+            hp = hp -2;
+        }
+
+    }
+    // move ball enemy
+    for (let i =0 ; i< ballenemy.length; i++){
+        ballenemy[i].x+=ballenemy[i].speedX;
+        ballenemy[i].y+=ballenemy[i].speedY;
+        if (ballenemy[i].x < ballenemy[i].radius || ballenemy[i].x > (VERY_RIGHT - ballenemy[i].radius)){
+            ballenemy[i].speedX = -ballenemy[i].speedX;
+        }
+        if (ballenemy[i].y > VERY_BUTTON - ballenemy[i].radius) {
+            ballenemy[i].speedY = -ballenemy[i].speedY;
+            hp--;
+        }
+        if (ballenemy[i].y < ballenemy[i].radius) {
+            ballenemy[i].speedY = -ballenemy[i].speedY;
+        }
+        // khoang cach ball enemy with gun
+        let dx = Math.abs(ballenemy[i].x - (VERY_RIGHT / 2));
+        let dy = Math.abs(ballenemy[i].y - (VERY_BUTTON - 60));
+        if (dx <= (80 + ballenemy[i].radius) && dy <= (80 + ballenemy[i].radius)){
+            ballenemy.splice(ballenemy.indexOf(ballenemy[i]), 1);
+            hp = hp -4;
         }
     }
     //move rect
@@ -88,6 +130,17 @@ function moveEnemy() {
         if (rects[i].y > VERY_BUTTON - 20) {
             rects.splice(rects.indexOf(rects[i]), 1);
             hp--;
+        }
+        // khoang cach rect with gun
+        let dx = Math.abs(rects[i].x - (VERY_RIGHT / 2));
+        let dy = Math.abs(rects[i].y - (VERY_BUTTON - 60));
+        if ( rects[i].x <= (VERY_RIGHT/2) && dx <= (80 + rects[i].length) && dy <= (80 + rects[i].width)){
+            rects.splice(rects.indexOf(rects[i]), 1);
+            hp = hp -2;
+        }
+        if ( rects[i].x >= (VERY_RIGHT/2) && dx <= 80 && dy <= (80 + rects[i].width)){
+            rects.splice(rects.indexOf(rects[i]), 1);
+            hp = hp -2;
         }
     }
 }
@@ -100,6 +153,12 @@ function moveAll() {
 function drawGun() {
     pen.fillStyle = "#aacc44";
     pen.strokeStyle = "#aacc44";
+    pen.beginPath();
+    pen.lineWidth = "1";
+    pen.arc((VERY_RIGHT / 2), VERY_BUTTON - 60, 80, 0, 2 * Math.PI);
+    pen.stroke();
+
+    pen.beginPath();
     pen.rect((VERY_RIGHT / 2) - 30, VERY_BUTTON - 60, 60, 60);
     pen.fill();
 
@@ -124,6 +183,13 @@ function drawEnemy() {
         pen.beginPath();
         pen.arc(balls[i].x, balls[i].y, balls[i].radius, 0, 2 * Math.PI);
         pen.fillStyle = balls[i].color;
+        pen.fill();
+    }
+    //draw ball enemy
+    for (let i = 0; i<ballenemy.length; i++){
+        pen.beginPath();
+        pen.arc(ballenemy[i].x, ballenemy[i].y, ballenemy[i].radius, 0, 2 * Math.PI);
+        pen.fillStyle = ballenemy[i].color;
         pen.fill();
     }
     //drawRect
@@ -195,7 +261,7 @@ function checkTypeBall(ball,check_ball,check_rect) {
             break;
         }
     }
-    return [check_ball,check_rect,index_ball,index_rect];
+    return [check_ball,index_ball,check_rect,index_rect];
 }
 
 function checkTypeRect(rect,check_ball,check_rect) {
@@ -240,8 +306,10 @@ function selectEnemy() {
         let ball = new Ball();
         let check_ball = true ;
         let check_rect = true;
+        // let check_ballEnemy = true;
         let check = checkTypeBall(ball,check_ball,check_rect);
-        if (check[0] === true && check[1] === true) {
+        console.log(check);
+        if (check[0] === true && check[2] === true) {
             balls.push(ball);
         }
     }
@@ -250,10 +318,11 @@ function selectEnemy() {
         let ball = new Ball();
         let check_ball = true ;
         let check_rect = true;
+        // let check_ballEnemy = true;
         ball.radius = 20;
         ball.hp_ball = 3;
         let check = checkTypeBall(ball,check_ball,check_rect);
-        if ( check[0] === true && check[1] === true) {
+        if ( check[0] === true && check[2] === true) {
             balls.push(ball);
         }
     }
@@ -280,8 +349,20 @@ function selectEnemy() {
             rects.push(rect);
         }
     }
+    //new enemy
+    if (count % 200 === 0){
+        let ball = new Ball();
+        ball.x = Math.floor(Math.random()*(VERY_RIGHT - 60))+30;
+        ball.y = 50 ;
+        ball.radius = 30;
+        let speed = [-5,5];
+        ball.speedX = speed[Math.floor(Math.random()*2)];
+        ball.speedY = speed[Math.floor(Math.random()*2)];
+        ball.color = getRandomColor();
+        ball.hp_ball = 2;
+        ballenemy.push(ball);
+    }
 }
-drawAll();
 function loop() {
     count++;
     selectEnemy();
@@ -303,12 +384,14 @@ function loop() {
         balls = [];
         rects = [];
         shots = [];
+        ballenemy = [];
         document.getElementById('result').innerHTML = '<h1>YOU WIN !!!</h1>'
     }
     //Sau point = 250 thi speed tang len
     if (point % 50 === 0) {
         for (let i = 0; i < balls.length; i++) {
-            balls[i].speed = balls[i].speed * 21 / 20;
+            balls[i].speedX = balls[i].speedX * 21 / 20;
+            balls[i].speedY = balls[i].speedY * 21 / 20;
         }
         for (let i = 0; i < rects.length; i++) {
             rects[i].speed = rects[i].speed * 21 / 20;
@@ -319,12 +402,13 @@ function loop() {
     for (let i = 0; i< shots.length ; i++){
         let check_ball = true;
         let check_rect = true;
-        let check = checkTypeBall(shots[i],check_ball,check_rect);
+        let check_ballEnemy = true;
+        let check = checkTypeBall(shots[i],check_ball,check_rect,check_ballEnemy);
         if (check[0] === false){
-            balls[check[2]].hp_ball--;
-            if (balls[check[2]].hp_ball === 0){
+            balls[check[1]].hp_ball--;
+            if (balls[check[1]].hp_ball === 0){
                 shots.splice(shots.indexOf(shots[i]),1);
-                balls.splice(balls.indexOf(balls[check[2]]),1);
+                balls.splice(balls.indexOf(balls[check[1]]),1);
                 point++;
             }
             else {
@@ -333,7 +417,7 @@ function loop() {
             }
             break;
         }
-        if (check[1] === false){
+        if (check[2] === false){
             rects[check[3]].hp_rect--;
             if (rects[check[3]].hp_rect === 0){
                 shots.splice(shots.indexOf(shots[i]),1);
@@ -342,6 +426,24 @@ function loop() {
             }else {
                 shots.splice(shots.indexOf(shots[i]),1);
                 point++;
+            }
+            break;
+        }
+        //shot gun ball enemy
+        for(let j=0; j<ballenemy.length; j++){
+            let dx = Math.abs(shots[i].x - ballenemy[j].x);
+            let dy = Math.abs(shots[i].y - ballenemy[j].y);
+            if (dx <= (shots[i].radius + ballenemy[j].radius) && dy <= (shots[i].radius + ballenemy[j].radius)) {
+                ballenemy[j].hp_ball--;
+                if (ballenemy[j].hp_ball === 0){
+                    shots.splice(shots.indexOf(shots[i]),1);
+                    ballenemy.splice(ballenemy.indexOf(ballenemy[j]),1);
+                    point++;
+                }else {
+                    shots.splice(shots.indexOf(shots[i]),1);
+                    point++;
+                }
+                break;
             }
             break;
         }
