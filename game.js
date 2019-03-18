@@ -137,7 +137,10 @@ function drawEnemy() {
 
 function drawShots() {
     for (let i = 0; i < shots.length; i++) {
-        shots[i].draw();
+        pen.fillStyle = "#aacc44";
+        pen.beginPath();
+        pen.arc(shots[i].x, shots[i].y, shots[i].radius, 0, 2 * Math.PI);
+        pen.fill();
     }
 }
 
